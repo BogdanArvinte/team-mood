@@ -1,0 +1,26 @@
+{
+  "name": "team-mood",
+  "version": "1.0.0",
+  "description": "Record and display team mood.",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/marvin89/team-mood.git"
+  },
+  "scripts": {
+    "start": "node index"
+  },
+  "keywords": [
+    "team",
+    "feelings",
+    "fastify"
+  ],
+  "author": "mArvin",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^2.13.0",
+    "fastify-helmet": "^3.0.2",
+    "fastify-sensible": "^2.1.1",
+    "fastify-static": "^2.6.0",
+    "lowdb": "^1.0.0"
+  }
+}
