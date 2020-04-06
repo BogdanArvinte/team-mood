@@ -1,3 +1,5 @@
+const MOOD = {};
+
 function getFormattedDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -31,28 +33,24 @@ function buttonRipple(event) {
   document.body.appendChild(ripple);
 }
 
-function getTeam() {
-  let team = localStorage.getItem("team");
+function displayTeam(team) {
+  document.querySelector("h2 .team").textContent = team;
+}
 
-  return new Promise((resolve, reject) => {
-    if (!team) {
-      const dialog = document.querySelector("dialog");
-      dialogPolyfill.registerDialog(dialog);
-      if (!dialog.dataset.init) {
-        dialog.addEventListener("close", (event) => {
-          team = event.target.querySelector("[name=team]").value;
-          if (!team) reject();
-          localStorage.setItem("team", team);
-          document.querySelector("h2").textContent = team;
-          resolve(team);
-        });
-      }
-      dialog.dataset.init = true;
-      dialog.showModal();
-    } else {
-      resolve(team);
-    }
-  });
+function setTeam(team) {
+  localStorage.setItem("team", team);
+}
+
+async function drawTeamStats(team) {
+  const teamData = await getStatistics(team);
+  const angerColor = getElementBackgroundColor(".anger.emote");
+  const joyColor = getElementBackgroundColor(".joy.emote");
+  const sadnessColor = getElementBackgroundColor(".sadness.emote");
+
+  drawChart(
+    MOOD.chart,
+    parseTeamData(teamData, angerColor, joyColor, sadnessColor)
+  );
 }
 
 async function saveEmote(event) {
@@ -73,10 +71,28 @@ async function saveEmote(event) {
       }),
     });
 
-    window.dispatchEvent(new CustomEvent("emote-added"));
+    window.dispatchEvent(new CustomEvent("emote-update"));
   } catch {
     return;
   }
+}
+
+function showDialog() {
+  const dialog = document.querySelector("dialog");
+  dialog.removeEventListener("close", onDialogClose);
+  dialog.addEventListener("close", onDialogClose);
+  dialog.showModal();
+}
+
+function onDialogClose(event) {
+  const dialog = event.target;
+  const inputValue = dialog.querySelector("input").value;
+  if (!inputValue) {
+    return showDialog();
+  }
+  window.dispatchEvent(
+    new CustomEvent("team-change", { detail: { team: inputValue } })
+  );
 }
 
 function getElementBackgroundColor(selector) {
@@ -116,11 +132,31 @@ function drawChart(chart = null, data) {
 
 async function getStatistics(team) {
   if (!team) return;
+  let result;
 
-  return fetch(`/emotes/${team}`).then((response) => response.json());
+  try {
+    const response = await fetch(`/emotes/${team}`).then((response) =>
+      response.json()
+    );
+    if (response.statusCode && response.statusCode !== 200) {
+      result = null;
+      document.querySelector("h2 .error").hidden = false;
+    } else {
+      result = response;
+      document.querySelector("h2 .error").hidden = true;
+    }
+  } catch (error) {
+    result = null;
+  }
+
+  return result;
 }
 
 function parseTeamData(teamData, angerColor, joyColor, sadnessColor) {
+  if (!teamData) {
+    return;
+  }
+
   let data = {
     labels: [],
     datasets: [
@@ -167,33 +203,35 @@ async function init() {
     navigator.serviceWorker.register("service-worker.js");
   }
 
-  const team = await getTeam();
-  document.querySelector("h2").textContent = team;
+  const dialog = document.querySelector("dialog");
+  dialogPolyfill.registerDialog(dialog);
+
+  const team = localStorage.getItem("team");
+
+  if (!team) {
+    showDialog();
+  } else {
+    displayTeam(team);
+    drawTeamStats(team);
+  }
+
+  window.addEventListener("team-change", (event) => {
+    const team = event.detail.team;
+    displayTeam(team);
+    setTeam(team);
+    drawTeamStats(team);
+  });
+
+  window.addEventListener("emote-update", (event) => {
+    const team = event.detail.team;
+    drawTeamStats(team);
+  });
 
   document.querySelectorAll(".emote").forEach((emote) => {
-    emote.addEventListener("mousedown", saveEmote);
-    emote.addEventListener("keydown", saveEmote);
+    emote.addEventListener("click", saveEmote);
   });
 
-  if (!team) returm;
-
-  const teamData = await getStatistics(team);
-  const angerColor = getElementBackgroundColor(".anger.emote");
-  const joyColor = getElementBackgroundColor(".joy.emote");
-  const sadnessColor = getElementBackgroundColor(".sadness.emote");
-
-  const chart = drawChart(
-    null,
-    parseTeamData(teamData, angerColor, joyColor, sadnessColor)
-  );
-
-  window.addEventListener("emote-added", async () => {
-    const teamData = await getStatistics(team);
-    drawChart(
-      chart,
-      parseTeamData(teamData, angerColor, joyColor, sadnessColor)
-    );
-  });
+  document.querySelector("h2 .edit").addEventListener("click", showDialog);
 }
 
 init();
