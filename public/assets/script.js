@@ -41,6 +41,10 @@ function setTeam(team) {
   localStorage.setItem("team", team);
 }
 
+function getTeam() {
+  return localStorage.getItem("team");
+}
+
 async function drawTeamStats(team) {
   const teamData = await getStatistics(team);
   const angerColor = getElementBackgroundColor(".anger.emote");
@@ -54,11 +58,10 @@ async function drawTeamStats(team) {
 }
 
 async function saveEmote(event) {
-  if (event.type === "keydown" && event.code !== "Space") return;
   buttonRipple(event);
   const button = event.target;
   try {
-    const team = await getTeam();
+    const team = getTeam();
 
     await fetch(`/emotes/${team}`, {
       method: "POST",
@@ -71,7 +74,7 @@ async function saveEmote(event) {
       }),
     });
 
-    window.dispatchEvent(new CustomEvent("emote-update"));
+    window.dispatchEvent(new CustomEvent("emote-update", { detail: { team } }));
   } catch {
     return;
   }
