@@ -1,6 +1,6 @@
 {
   "name": "team-mood",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Record and display team mood.",
   "main": "index.js",
   "repository": {
