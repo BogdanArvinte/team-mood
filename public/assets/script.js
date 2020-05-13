@@ -50,10 +50,11 @@ async function drawTeamStats(team) {
   const angerColor = getElementBackgroundColor(".anger.emote");
   const joyColor = getElementBackgroundColor(".joy.emote");
   const sadnessColor = getElementBackgroundColor(".sadness.emote");
+  const exhaustionColor = getElementBackgroundColor(".exhaustion.emote");
 
   drawChart(
     MOOD.chart,
-    parseTeamData(teamData, angerColor, joyColor, sadnessColor)
+    parseTeamData(teamData, angerColor, joyColor, sadnessColor, exhaustionColor)
   );
 }
 
@@ -155,7 +156,13 @@ async function getStatistics(team) {
   return result;
 }
 
-function parseTeamData(teamData, angerColor, joyColor, sadnessColor) {
+function parseTeamData(
+  teamData,
+  angerColor,
+  joyColor,
+  sadnessColor,
+  exhaustionColor
+) {
   if (!teamData) {
     return;
   }
@@ -166,6 +173,7 @@ function parseTeamData(teamData, angerColor, joyColor, sadnessColor) {
       { label: "Anger", data: [] },
       { label: "Joy", data: [] },
       { label: "Sadness", data: [] },
+      { label: "Exhaustion", data: [] },
     ],
   };
 
@@ -174,6 +182,7 @@ function parseTeamData(teamData, angerColor, joyColor, sadnessColor) {
     data.datasets[0].data.push(entry.anger);
     data.datasets[1].data.push(entry.joy);
     data.datasets[2].data.push(entry.sadness);
+    data.datasets[3].data.push(entry.exhaustion);
   });
 
   data.datasets[0] = {
@@ -195,6 +204,13 @@ function parseTeamData(teamData, angerColor, joyColor, sadnessColor) {
     borderColor: Array(data.datasets[2].data.length).fill(sadnessColor),
     backgroundColor: Array(data.datasets[2].data.length).fill(
       sadnessColor.replace(", 1)", ", 0.2)")
+    ),
+  };
+  data.datasets[3] = {
+    ...data.datasets[3],
+    borderColor: Array(data.datasets[3].data.length).fill(exhaustionColor),
+    backgroundColor: Array(data.datasets[3].data.length).fill(
+      exhaustionColor.replace(", 1)", ", 0.2)")
     ),
   };
 

@@ -29,7 +29,7 @@ fastify.get("/emotes/:team", (request, reply) => {
   try {
     const teamName = request.params.team.toUpperCase();
     if (!teamName) {
-      reply.notFound();
+      reply.notFound(`No team with the name "${teamName}" was found.`);
     }
     const team = db.get("teams").find({ name: teamName });
     if (team.value()) {
@@ -50,7 +50,7 @@ fastify.post("/emotes/:team", (request, reply) => {
     }
     const team = db.get("teams").find({ name: teamName });
     if (!team.value()) {
-      reply.notFound(`No team with the name "${teamName}" as found.`);
+      reply.notFound(`No team with the name "${teamName}" was found.`);
     }
     const entry = team.get("entries").find({ date });
     if (!entry.value()) {
