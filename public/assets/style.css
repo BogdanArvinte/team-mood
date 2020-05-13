@@ -125,7 +125,8 @@ dialog form button {
 
 .emote {
   position: relative;
-  font-size: 2em;
+  font-size: 3rem;
+  font-weight: bold;
   margin: 1rem;
   padding: 1rem;
   border-radius: 50%;
@@ -135,6 +136,11 @@ dialog form button {
   height: 10vw;
   background: none;
   border: none;
+}
+
+.emote small {
+  font-size: 1.2rem;
+  display: block;
 }
 
 .anger {
@@ -151,6 +157,12 @@ dialog form button {
 .sadness {
   background: #31b;
   box-shadow: 0 1rem 0 #20a;
+  color: white;
+}
+
+.exhaustion {
+  background: #676;
+  box-shadow: 0 1rem 0 #454;
   color: white;
 }
 
