@@ -18,8 +18,8 @@
   "license": "MIT",
   "dependencies": {
     "fastify": "^2.15.1",
-    "fastify-helmet": "^3.0.2",
-    "fastify-sensible": "^2.1.1",
+    "fastify-helmet": "^7.1.0",
+    "fastify-sensible": "^3.2.0",
     "fastify-static": "^4.4.1",
     "lowdb": "^1.0.0"
   }
