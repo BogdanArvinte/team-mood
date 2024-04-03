@@ -1,84 +1,93 @@
-const path = require("path");
-const fastify = require("fastify")({ logger: true });
-const helmet = require("fastify-helmet");
-const static = require("fastify-static");
-const sensible = require("fastify-sensible");
-const low = require("lowdb");
-const FileSync = require("lowdb/adapters/FileSync");
+import path from "path";
+import Fastify from "fastify";
+import helmet from "@fastify/helmet";
+import fstatic from "@fastify/static";
+import sensible from "@fastify/sensible";
+import { Low } from "lowdb";
+import { JSONFile } from "lowdb/node";
 
-const adapter = new FileSync("db.json", {
-  defaultValue: {
-    teams: [],
-  },
+const fastify = Fastify({
+  logger: true,
 });
-const db = low(adapter);
+
+const adapter = new JSONFile("db.json");
+const db = new Low(adapter, {
+  teams: [],
+});
+
+await db.read();
 
 fastify
-  .register(helmet)
+  .register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        "script-src-elem": [
+          ...helmet.contentSecurityPolicy.getDefaultDirectives()["default-src"],
+          "https://cdn.jsdelivr.net",
+        ],
+      },
+    },
+  })
   .register(sensible)
-  .register(static, {
-    root: path.join(__dirname, "public"),
+  .register(fstatic, {
+    root: path.join(path.resolve("."), "public"),
     prefix: "/public/",
   });
 
-fastify.get("/", (request, reply) => {
-  reply.sendFile("index.html");
+fastify.get("/", (_req, res) => {
+  res.sendFile("index.html");
 });
 
-fastify.get("/emotes/:team", (request, reply) => {
+fastify.get("/emotes/:team", (req, res) => {
   try {
-    const teamName = request.params.team.toUpperCase();
+    const teamName = req.params.team.toUpperCase();
     if (!teamName) {
-      reply.notFound(`No team with the name "${teamName}" was found.`);
+      return res.notFound(`No team with the name "${teamName}" was found.`);
     }
-    const team = db.get("teams").find({ name: teamName });
-    if (team.value()) {
-      reply.code(200).send(team);
+    const team = db.data.teams.find((t) => t.name === teamName);
+    if (team) {
+      return res.code(200).send(team);
     }
-    reply.notFound();
-  } catch {
-    reply.internalServerError();
-  }
-});
-
-fastify.post("/emotes/:team", (request, reply) => {
-  try {
-    const { date, emote } = request.body;
-    const teamName = request.params.team.toUpperCase();
-    if (!date || !emote || !teamName) {
-      reply.badRequest();
-    }
-    const team = db.get("teams").find({ name: teamName });
-    if (!team.value()) {
-      reply.notFound(`No team with the name "${teamName}" was found.`);
-    }
-    const entry = team.get("entries").find({ date });
-    if (!entry.value()) {
-      team
-        .get("entries")
-        .push({ date, [emote]: 1 })
-        .write();
-    } else {
-      const previousEmoteValue = entry.value()[emote];
-      entry
-        .assign({ [emote]: previousEmoteValue ? previousEmoteValue + 1 : 1 })
-        .write();
-    }
-    reply.code(200).send({ message: "Entry saved successfully." });
+    res.notFound();
   } catch (e) {
-    console.log(e);
-    reply.code(500).send({ message: "Could not save entry." });
+    console.error(e);
+    res.internalServerError();
   }
 });
 
-const start = async () => {
+fastify.post("/emotes/:team", async (req, res) => {
   try {
-    await fastify.listen(3456);
+    const { date, emote } = req.body;
+    const teamName = req.params.team.toUpperCase();
+    if (!date || !emote || !teamName) {
+      return res.badRequest();
+    }
+    const team = db.data.teams.find((t) => t.name === teamName);
+    if (!team) {
+      return res.notFound(`No team with the name "${teamName}" was found.`);
+    }
+    const entry = team.entries.find((e) => e.date === date);
+    if (!entry) {
+      team.entries.push({ date, [emote]: 1 });
+    } else {
+      entry[emote] = entry[emote] + 1 || 1;
+    }
+    await db.write();
+    res.code(200).send({ message: "Entry saved successfully." });
+  } catch (e) {
+    console.error(e);
+    res.code(500).send({ message: "Could not save entry." });
+  }
+});
+
+async function start() {
+  try {
+    await fastify.listen({ port: 3456, host: "0.0.0.0" });
     fastify.log.info(`server listening on ${fastify.server.address().port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-};
+}
 
 start();

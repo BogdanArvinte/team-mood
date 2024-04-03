@@ -5,30 +5,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Team Mood</title>
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href="assets/apple-touch-icon.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href="assets/favicon-32x32.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="assets/favicon-16x16.png"
-    />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png" />
     <link rel="manifest" href="site.webmanifest" />
     <link rel="mask-icon" href="assets/safari-pinned-tab.svg" color="#da532c" />
     <link rel="shortcut icon" href="assets/favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="msapplication-config" content="assets/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="stylesheet" href="assets/dialog-polyfill.css" />
     <link rel="stylesheet" href="assets/style.css" />
   </head>
   <body>
@@ -40,16 +25,10 @@
       </h2>
     </header>
     <div class="emotes">
-      <button class="anger emote" data-emote="anger">
-        😡<small>Anger</small>
-      </button>
+      <button class="anger emote" data-emote="anger">😡<small>Anger</small></button>
       <button class="joy emote" data-emote="joy">😀<small>Joy</small></button>
-      <button class="sadness emote" data-emote="sadness">
-        😭<small>Sadness</small>
-      </button>
-      <button class="exhaustion emote" data-emote="exhaustion">
-        😵<small>Exhaustion</small>
-      </button>
+      <button class="sadness emote" data-emote="sadness">😭<small>Sadness</small></button>
+      <button class="exhaustion emote" data-emote="exhaustion">😵<small>Exhaustion</small></button>
     </div>
     <canvas id="chart"></canvas>
     <dialog>
@@ -58,8 +37,7 @@
         <button>Save</button>
       </form>
     </dialog>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
-    <script src="assets/dialog-polyfill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3"></script>
     <script src="assets/script.js"></script>
   </body>
 </html>
