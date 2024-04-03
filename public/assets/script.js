@@ -14,7 +14,7 @@ function buttonRipple(event) {
     existingRipple.remove();
   }
   let position;
-  const element = event.path.shift();
+  const element = event.currentTarget;
   const elementColor = window.getComputedStyle(element).backgroundColor;
   if (event.type === "keydown") {
     const clientRect = element.getClientRects()[0];
@@ -94,23 +94,18 @@ function onDialogClose(event) {
   if (!inputValue) {
     return showDialog();
   }
-  window.dispatchEvent(
-    new CustomEvent("team-change", { detail: { team: inputValue } })
-  );
+  window.dispatchEvent(new CustomEvent("team-change", { detail: { team: inputValue } }));
 }
 
 function getElementBackgroundColor(selector) {
-  let color = window.getComputedStyle(document.querySelector(selector))
-    .backgroundColor;
+  let color = window.getComputedStyle(document.querySelector(selector)).backgroundColor;
   color = color.replace("rgb", "rgba").replace(")", ", 1)");
   return color;
 }
 
-function drawChart(chart = null, data) {
-  let _chart;
-
+function drawChart(chart, data) {
   if (!chart) {
-    _chart = new Chart("chart", {
+    return new Chart("chart", {
       type: "line",
       data,
       options: {
@@ -126,12 +121,10 @@ function drawChart(chart = null, data) {
       },
     });
   } else {
-    _chart = chart;
-    _chart.data = data;
-    _chart.update();
+    chart.data = data;
+    chart.update();
+    return chart;
   }
-
-  return _chart;
 }
 
 async function getStatistics(team) {
@@ -139,9 +132,7 @@ async function getStatistics(team) {
   let result;
 
   try {
-    const response = await fetch(`/emotes/${team}`).then((response) =>
-      response.json()
-    );
+    const response = await fetch(`/emotes/${team}`).then((response) => response.json());
     if (response.statusCode && response.statusCode !== 200) {
       result = null;
       document.querySelector("h2 .error").hidden = false;
@@ -156,13 +147,7 @@ async function getStatistics(team) {
   return result;
 }
 
-function parseTeamData(
-  teamData,
-  angerColor,
-  joyColor,
-  sadnessColor,
-  exhaustionColor
-) {
+function parseTeamData(teamData, angerColor, joyColor, sadnessColor, exhaustionColor) {
   if (!teamData) {
     return;
   }
@@ -188,16 +173,12 @@ function parseTeamData(
   data.datasets[0] = {
     ...data.datasets[0],
     borderColor: Array(data.datasets[0].data.length).fill(angerColor),
-    backgroundColor: Array(data.datasets[0].data.length).fill(
-      angerColor.replace(", 1)", ", 0.2)")
-    ),
+    backgroundColor: Array(data.datasets[0].data.length).fill(angerColor.replace(", 1)", ", 0.2)")),
   };
   data.datasets[1] = {
     ...data.datasets[1],
     borderColor: Array(data.datasets[1].data.length).fill(joyColor),
-    backgroundColor: Array(data.datasets[1].data.length).fill(
-      joyColor.replace(", 1)", ", 0.2)")
-    ),
+    backgroundColor: Array(data.datasets[1].data.length).fill(joyColor.replace(", 1)", ", 0.2)")),
   };
   data.datasets[2] = {
     ...data.datasets[2],
@@ -221,9 +202,6 @@ async function init() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
   }
-
-  const dialog = document.querySelector("dialog");
-  dialogPolyfill.registerDialog(dialog);
 
   const team = localStorage.getItem("team");
 
