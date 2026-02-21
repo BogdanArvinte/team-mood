@@ -19,7 +19,7 @@
   "dependencies": {
     "@fastify/helmet": "^11.1.1",
     "@fastify/sensible": "^5.5.0",
-    "@fastify/static": "^7.0.2",
+    "@fastify/static": "^9.0.0",
     "fastify": "^5.7.3",
     "lowdb": "^7.0.1"
   }
